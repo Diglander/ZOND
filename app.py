@@ -2,15 +2,15 @@ from flask import Flask, url_for, g #для гибких гиперссылок,
 import requests
 from dotenv import load_dotenv # для чтения api-key′я из .env
 import os # для записи api-key′я из .env
-from api_clients import ExchangeAPI
+from api_clients import ExchangeApiClient, CBRFClient
 
 load_dotenv() #подгрузка .env в область видимости (scope)
 
 app = Flask(__name__)
 
-API_KEY = os.getenv('EXCHANGE_API_KEY')
+API_KEY, CB_API = os.getenv('EXCHANGE_API_KEY'), os.getenv("CB_API")
 
-Exchange_Client = ExchangeAPI(API_KEY)
+Exchange_Client = ExchangeApiClient(API_KEY)
 
 @app.before_request
 def load_rates():
@@ -18,7 +18,12 @@ def load_rates():
     if Exchange_Client.success:
         g.rates = Exchange_Client.rates
     else:
-        g.rates = None
+        Cbrf_Client = CBRFClient(CB_API)
+        Cbrf_Client.fetch_rates()
+        if Cbrf_Client.success:
+            g.rates = Cbrf_Client.rates
+        else:
+            print ("Не удалось подключиться ни к одному API!")
 
 @app.route('/')
 def intro():
