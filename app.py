@@ -1,4 +1,4 @@
-from flask import Flask, url_for, g #для гибких гиперссылок, хуки
+from flask import Flask, url_for, g, render_template #для гибких гиперссылок, хуки и дизайна
 import requests
 from dotenv import load_dotenv # для чтения api-key′я из .env
 import os # для записи api-key′я из .env
@@ -24,28 +24,49 @@ def load_rates():
             g.rates = Cbrf_Client.rates
         else:
             print ("Не удалось подключиться ни к одному API!")
+            g.rates = None
 
 @app.route('/')
 def intro():
-    return f"""
-<h1>Привет! Выбирай что хочешь!</h1> 
-<p><a href="{url_for('USD_RUB')}"> Рубль</a></p>
-<p><a href="{url_for('USD_CNY')}"> Юань</a></p>
-""" #использовали url_for для гиперссылок
+    return render_template('index.html')
+    
+    #return f"""
+#<h1>Привет! Выбирай что хочешь!</h1> 
+#<p><a href="{url_for('USD_RUB')}"> Рубль</a></p>
+#<p><a href="{url_for('USD_CNY')}"> Юань</a></p>
+#""" #использовали url_for для гиперссылок
 
 @app.route('/RUB')
 def USD_RUB():
-    if (g.rates and g.rates.get('RUB')):
-        return f'<h1><a href="{url_for('intro')}"> В 1 долларе {g.rates.get('RUB')} рублей</h1>'
+    if g.rates and g.rates.get('RUB'):    
+        context = {
+            'currency_code' : 'RUB',
+            'rate' : g.rates.get('RUB')
+        }
+        return render_template('rate.html', data = context)
     else:
-        return "<h1>Ошибка</h1>"
+        return render_template('error.html', message = "Нет доступа к курсу рубля.")
+        
+# if (g.rates and g.rates.get('RUB')):
+#     return f'<h1><a href="{url_for('intro')}"> В 1 долларе {g.rates.get('RUB')} рублей</h1>'
+# else:
+#     return "<h1>Ошибка</h1>"
 
 @app.route('/CNY')
 def USD_CNY():
-    if (g.rates and g.rates.get('CNY')):
-        return f'<h1><a href="{url_for('intro')}"> В 1 долларе {g.rates.get('CNY')} юаней</h1>'
+    if g.rates and g.rates.get('CNY'):    
+        context = {
+            'currency_code' : 'CNY',
+            'rate' : g.rates.get('CNY')
+        }
+        return render_template('rate.html', data = context)
     else:
-        return "<h1>Ошибка</h1>"
+        return render_template('error.html', message = "Нет доступа к курсу юаня.")
+
+#    if (g.rates and g.rates.get('CNY')):
+#        return f'<h1><a href="{url_for('intro')}"> В 1 долларе {g.rates.get('CNY')} юаней</h1>'
+#    else:
+#        return "<h1>Ошибка</h1>"
 
 if __name__ == '__main__':
     app.run(debug=True)

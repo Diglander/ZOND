@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Курс {{ data.currency_name }}</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; text-align: center; margin-top: 5rem; background-color: #f8f9fa; }
+        .card { display: inline-block; padding: 2rem; background: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .rate { font-size: 3rem; font-weight: bold; margin: 1rem 0; color: #28a745; }
+        .currency { font-size: 1.5rem; color: #6c757d; }
+        a { margin-top: 2rem; display: inline-block; color: #007bff; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="currency">1 Доллар США равен</div>
+        <div class="rate">{{ data.rate }}</div>
+        <div class="currency">{{ data.currency_name }} ({{ data.currency_code }})</div>
+    </div>
+    <br>
+    <a href="{{ url_for('intro') }}">← Назад к выбору</a>
+</body>
+</html>
