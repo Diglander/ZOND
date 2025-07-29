@@ -1,0 +1,12 @@
+max-line-length = 88
+ignore = E203, W503
+max-complexity = 12
+exclude =
+    .git,          # Папка системы контроля версий Git.
+    __pycache__,   # Папка с кешем Python.
+    .venv,         # Папка с виртуальным окружением (там тысячи чужих файлов!).
+    .env,        
+    .gitignore,
+    notes,
+    requirements.txt        
+    
