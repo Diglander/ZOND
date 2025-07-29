@@ -1,72 +1,78 @@
-from flask import Flask, url_for, g, render_template #для гибких гиперссылок, хуки и дизайна
-import requests
-from dotenv import load_dotenv # для чтения api-key′я из .env
-import os # для записи api-key′я из .env
+from flask import (
+    Flask,
+    url_for,
+    g,
+    render_template,
+    request
+)  # для гибких гиперссылок, хуки и дизайна
+from dotenv import load_dotenv  # для чтения api-key′я из .env
+import os  # для записи api-key′я из .env
 from api_clients import ExchangeApiClient, CBRFClient
+from loguru import logger
+import sys  # для вывода логов в консоль
 
-load_dotenv() #подгрузка .env в область видимости (scope)
+
+logger.remove  # удаляем стандартный logger, делаем свой
+logger.add(
+    sys.stderr,
+    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+)
+
+
+load_dotenv()  # подгрузка .env в область видимости (scope)
 
 app = Flask(__name__)
 
-API_KEY, CB_API = os.getenv('EXCHANGE_API_KEY'), os.getenv("CB_API")
-
+API_KEY, CB_API = os.getenv("EXCHANGE_API_KEY"), os.getenv("CB_API")
 Exchange_Client = ExchangeApiClient(API_KEY)
+
 
 @app.before_request
 def load_rates():
+    logger.info(f"Входящий запрос на {request.path} для получения курсов.")
+
     Exchange_Client.fetch_rates()
     if Exchange_Client.success:
+        logger.info("Успех! Используются данные от ExchangeApi.")
         g.rates = Exchange_Client.rates
+        return
     else:
+        logger.warning(
+            "Не удалось связаться с основным API (ExchangeApi)."
+            "Пробуем соединиться с API ЦБ РФ."
+        )
         Cbrf_Client = CBRFClient(CB_API)
         Cbrf_Client.fetch_rates()
         if Cbrf_Client.success:
+            logger.info("Успешно используются данные ЦБ РФ!")
             g.rates = Cbrf_Client.rates
         else:
-            print ("Не удалось подключиться ни к одному API!")
+            logger.error("Не удалось подключиться ни к одному API!")
             g.rates = None
 
-@app.route('/')
+
+@app.route("/")
 def intro():
-    return render_template('index.html')
-    
-    #return f"""
-#<h1>Привет! Выбирай что хочешь!</h1> 
-#<p><a href="{url_for('USD_RUB')}"> Рубль</a></p>
-#<p><a href="{url_for('USD_CNY')}"> Юань</a></p>
-#""" #использовали url_for для гиперссылок
+    return render_template("index.html")
 
-@app.route('/RUB')
+
+@app.route("/RUB")
 def USD_RUB():
-    if g.rates and g.rates.get('RUB'):    
-        context = {
-            'currency_code' : 'RUB',
-            'rate' : g.rates.get('RUB')
-        }
-        return render_template('rate.html', data = context)
+    if g.rates and g.rates.get("RUB"):
+        context = {"currency_code": "RUB", "rate": g.rates.get("RUB")}
+        return render_template("rate.html", data=context)
     else:
-        return render_template('error.html', message = "Нет доступа к курсу рубля.")
-        
-# if (g.rates and g.rates.get('RUB')):
-#     return f'<h1><a href="{url_for('intro')}"> В 1 долларе {g.rates.get('RUB')} рублей</h1>'
-# else:
-#     return "<h1>Ошибка</h1>"
+        return render_template("error.html", message="Нет доступа к курсу рубля.")
 
-@app.route('/CNY')
+
+@app.route("/CNY")
 def USD_CNY():
-    if g.rates and g.rates.get('CNY'):    
-        context = {
-            'currency_code' : 'CNY',
-            'rate' : g.rates.get('CNY')
-        }
-        return render_template('rate.html', data = context)
+    if g.rates and g.rates.get("CNY"):
+        context = {"currency_code": "CNY", "rate": g.rates.get("CNY")}
+        return render_template("rate.html", data=context)
     else:
-        return render_template('error.html', message = "Нет доступа к курсу юаня.")
+        return render_template("error.html", message="Нет доступа к курсу юаня.")
 
-#    if (g.rates and g.rates.get('CNY')):
-#        return f'<h1><a href="{url_for('intro')}"> В 1 долларе {g.rates.get('CNY')} юаней</h1>'
-#    else:
-#        return "<h1>Ошибка</h1>"
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
