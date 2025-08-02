@@ -5,6 +5,8 @@ charset-normalizer==3.4.2
 click==8.2.1
 flake8==7.3.0
 Flask==3.1.1
+Flask-SQLAlchemy==3.1.1
+greenlet==3.2.3
 idna==3.10
 itsdangerous==2.2.0
 Jinja2==3.1.6
@@ -19,5 +21,7 @@ pycodestyle==2.14.0
 pyflakes==3.4.0
 python-dotenv==1.1.1
 requests==2.32.4
+SQLAlchemy==2.0.42
+typing_extensions==4.14.1
 urllib3==2.5.0
 Werkzeug==3.1.3
