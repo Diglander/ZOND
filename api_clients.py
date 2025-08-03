@@ -49,7 +49,7 @@ class CBRFClient:
             return
 
         try:
-            print("Пользуемся ЦБ РФ!")
+            logger.info("Подключаемся к ЦБ РФ")
             temp_rates = {}
             rates_in_rub = {}
             response = requests.get(self.full_url)
