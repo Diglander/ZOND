@@ -1,0 +1,35 @@
+name: Run Python Tests
+
+# Триггер: Запускать этот сценарий при каждом push в ветку 'main'
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    # На какой машине запускать: последняя версия Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+    # Шаг 1: "Скачать" твой код на виртуальную машину
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # Шаг 2: Настроить Python нужной версии
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12.3' # Укажи версию Python, которую используешь
+
+    # Шаг 3: Установить зависимости
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    # Шаг 4: Запустить тесты!
+    - name: Run tests with pytest
+      run: |
+        pytest
