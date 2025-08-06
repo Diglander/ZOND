@@ -52,3 +52,55 @@ def setting_rates(
         db.session.commit()
         logger.info("Данные успешно сохранены в БД")
     return rates, api_code
+
+
+def force_API_Exchange(
+    db: SQLAlchemy,
+    RateHistory: type,
+    Exchange_Client: ExchangeApiClient,
+):
+    logger.info("ПРИНУДИТЕЛЬНЫЙ ЗАПРОС к ExchangeAPI.")
+    Exchange_Client.fetch_rates()
+    if Exchange_Client.success:
+        logger.info("Успех! Сохраняем данные от ExchangeApi.")
+        today = date.today()
+        # Удаляем старые записи за сегодня, если они были от другого источника
+        RateHistory.query.filter_by(date=today).delete()
+        for rate_code, rate in Exchange_Client.rates.items():
+            new_record = RateHistory(
+                date=today,
+                source_api="ExchangeAPI",
+                currency_code=rate_code,
+                rate_vs_usd=rate
+            )
+            db.session.add(new_record)
+        db.session.commit()
+        logger.info("Данные успешно сохранены в БД")
+    else:
+        logger.error("Принудительный запрос к ExchangeAPI провалился.")
+
+
+def force_CBRF(
+    db: SQLAlchemy,
+    RateHistory: type,
+    Cbrf_Client: CBRFClient
+):
+    logger.info("ПРИНУДИТЕЛЬНЫЙ ЗАПРОС к ЦБ РФ.")
+    Cbrf_Client.fetch_rates()
+    if Cbrf_Client.success:
+        logger.info("Успех! Сохраняем данные от ЦБ РФ.")
+        today = date.today()
+        # Удаляем старые записи за сегодня, если они были от другого источника
+        RateHistory.query.filter_by(date=today).delete()
+        for rate_code, rate in Cbrf_Client.rates.items():
+            new_record = RateHistory(
+                date=today,
+                source_api="ЦБ РФ",
+                currency_code=rate_code,
+                rate_vs_usd=rate
+            )
+            db.session.add(new_record)
+        db.session.commit()
+        logger.info("Данные успешно сохранены в БД")
+    else:
+        logger.error("Принудительный запрос к ЦБ РФ провалился.") 

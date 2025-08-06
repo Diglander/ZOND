@@ -3,7 +3,8 @@ from flask import (
     url_for,
     g,
     render_template,
-    request
+    request,
+    redirect
 )  # для гибких гиперссылок, хуки и дизайна
 from dotenv import load_dotenv  # для чтения api-key′я из .env
 import os  # для записи api-key′я из .env
@@ -14,7 +15,7 @@ from datetime import date
 
 from api_clients import ExchangeApiClient, CBRFClient
 from models import db, RateHistory
-from services import setting_rates
+from services import setting_rates, force_CBRF, force_API_Exchange
 
 logger.remove()  # удаляем стандартный logger, делаем свой
 logger.add(
@@ -42,25 +43,49 @@ def check_and_load_rates():
 
 @app.route("/")
 def intro():
-    return render_template("index.html")
+    if g.rates:
+        main_currencies = ['RUB', 'CNY', 'EUR', 'GBP'] #Самые частые валюты
+        main_list = []
+        minor_list = []
+        for code in sorted(g.rates.keys()):
+            if code in main_currencies:
+                main_list.append(code)
+            else:
+                minor_list.append(code)
+    else:
+        main_list = []
+        minor_list = []
+    
+    return render_template("index.html", main = main_list, minor = minor_list)
 
 
-@app.route("/RUB")
-def USD_RUB():
-    if g.rates and g.rates.get("RUB"):
-        context = {"currency_code": "RUB", "rate": g.rates.get("RUB")}
+@app.route("/<chosen_code>")
+def show_rate(chosen_code):
+    code = chosen_code.upper()
+    
+    if g.rates and g.rates.get(code):
+        context = {
+            "currency_chosen_code": code, 
+            "rate": g.rates.get(code),
+            "source": g.source,
+            "currency_name": code
+            }
+        
         return render_template("rate.html", data=context)
     else:
-        return render_template("error.html", message="Нет доступа к курсу рубля.")
+        return render_template("error.html", message="Нет доступа к курсам.")
 
 
-@app.route("/CNY")
-def USD_CNY():
-    if g.rates and g.rates.get("CNY"):
-        context = {"currency_code": "CNY", "rate": g.rates.get("CNY")}
-        return render_template("rate.html", data=context)
-    else:
-        return render_template("error.html", message="Нет доступа к курсу юаня.")
+@app.route("/force_reload/api_exchange")
+def force_reload_exchange():
+    force_API_Exchange(db, RateHistory, Exchange_Client)
+    return redirect(url_for('intro'))
+
+
+@app.route("/force_reload/cbrf")
+def force_reload_cbrf():
+    force_CBRF(db, RateHistory, Cbrf_Client)
+    return redirect(url_for('intro'))
 
 
 if __name__ == "__main__":
