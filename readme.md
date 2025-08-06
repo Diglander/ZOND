@@ -36,9 +36,9 @@ https://diglander.pythonanywhere.com/
 
 **Инструменты:** Loguru, python-dotenv
 
-## Установка и запуск
+# Установка и запуск
 
-# Запуск с Docker (Рекомундуемый способ)
+## Запуск с Docker (Рекомундуемый способ)
 ### 1. Клонируйте репозиторий
 
 ```bash
@@ -69,7 +69,7 @@ docker build -t zond-app .
 
 **Откройте http://localhost:5000 в вашем браузере**
 
-# Локальная установка (Без Docker)
+## Локальная установка (Без Docker)
 
 ```bash
 docker run -p 5000:5000 --env-file .env -d zond-app
