@@ -4,7 +4,7 @@
 
 ## GitHub
 https://github.com/Diglander/ZOND
-## Полностью функциональное ВЕБ-ПРИЛОЖЕНИЕ
+## Веб-Приложение
 https://diglander.pythonanywhere.com/
 
 ## Ключевые особенности
