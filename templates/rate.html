@@ -8,6 +8,7 @@
         .card { display: inline-block; padding: 2rem; background: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .rate { font-size: 3rem; font-weight: bold; margin: 1rem 0; color: #28a745; }
         .currency { font-size: 1.5rem; color: #6c757d; }
+        .source-info { font-size: 0.8rem; color: #888; margin-top: 1.5rem; }
         a { margin-top: 2rem; display: inline-block; color: #007bff; }
     </style>
 </head>
@@ -15,7 +16,8 @@
     <div class="card">
         <div class="currency">1 Доллар США равен</div>
         <div class="rate">{{ data.rate }}</div>
-        <div class="currency">{{ data.currency_name }} ({{ data.currency_code }})</div>
+        <div class="currency">{{ data.currency_name }} {{ data.currency_code }}</div>
+        <p class = "source-info">Данные получены от: {{data.source}}</strong></p>
     </div>
     <br>
     <a href="{{ url_for('intro') }}">← Назад к выбору</a>

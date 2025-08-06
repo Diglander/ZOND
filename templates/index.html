@@ -4,15 +4,113 @@
     <meta charset="UTF-8">
     <title>Выбор валюты</title>
     <style>
-        body { font-family: -apple-system, sans-serif; text-align: center; margin-top: 5rem; background-color: #f8f9fa; }
-        h1 { color: #343a40; }
-        a { display: inline-block; text-decoration: none; font-size: 1.2rem; margin: 1rem; padding: 1rem 2rem; color: #fff; background-color: #007bff; border-radius: 5px; transition: background-color 0.2s; }
-        a:hover { background-color: #0056b3; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            text-align: center;
+            margin: 2rem;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        .container { max-width: 960px; margin: auto; }
+        h1, h2 { color: #343a40; }
+        h1 { font-size: 2.5rem; font-weight: 600; }
+        h2 { margin-top: 3rem; border-bottom: 1px solid #dee2e6; padding-bottom: 0.5rem; font-size: 1.5rem; font-weight: 500;}
+
+        /* --- НОВЫЙ БЛОК: ПАНЕЛЬ УПРАВЛЕНИЯ (ПО ВАШЕМУ ДИЗАЙНУ) --- */
+        .control-panel {
+            padding: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 0.5rem; /* 8px */
+            background-color: #e9ecef;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .button-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
+        
+        a.button, .control-panel a { /* Общие стили для всех кнопок */
+            display: inline-block;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.3rem;
+            transition: all 0.2s ease-in-out;
+            color: #fff;
+        }
+        a.button:hover, .control-panel a:hover {
+             transform: translateY(-2px);
+             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        /* Основные кнопки для выбора валют (синие) */
+        a.button-main {
+            background-color: #007bff;
+        }
+        a.button-main:hover {
+            background-color: #0069d9;
+        }
+
+        /* Вторичные кнопки для всех остальных валют (серые) */
+        a.button-secondary {
+            background-color: #6c757d;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+        }
+        a.button-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        /* Кнопки в панели управления */
+        .control-panel .button-primary {
+            background-color: #007bff;
+        }
+        .control-panel .button-primary:hover {
+            background-color: #0069d9;
+        }
+        .control-panel .button-alt {
+            background-color: #6c757d;
+        }
+        .control-panel .button-alt:hover {
+            background-color: #5a6268;
+        }
+
     </style>
 </head>
 <body>
-    <h1>Привет! Выбирай что хочешь!</h1>
-    <a href="{{ url_for('USD_RUB') }}">Доллар к Рублю</a>
-    <a href="{{ url_for('USD_CNY') }}">Доллар к Юаню</a>
+    <div class="container">
+        <h1>ZOND</h1>
+        <h1 style="font-size: 2rem; font-weight: 400; margin-top: -1rem;">Надёжный доступ к курсам валют</h1>
+
+        <!-- ПАНЕЛЬ УПРАВЛЕНИЯ, СКОПИРОВАННАЯ С ВАШЕГО ИЗОБРАЖЕНИЯ -->
+        <div class="control-panel">
+            <a href="{{ url_for('force_reload_exchange') }}" class="button-primary">Получить курсы от ExchangeAPI</a>
+            <a href="{{ url_for('force_reload_cbrf') }}" class="button-alt">Получить курсы от ЦБ РФ</a>
+        </div>
+
+        <!-- Секция 1: Приоритетные валюты -->
+        <h2>Популярные курсы</h2>
+        <div class="button-grid">
+            {% for code in main %}
+                <a href="{{ url_for('show_rate', chosen_code=code) }}" class="button button-main">
+                    Доллар к {{ code }}
+                </a>
+            {% endfor %}
+        </div>
+
+        <!-- Секция 2: Все остальные -->
+        <h2>Все валюты</h2>
+        <div class="button-grid">
+            {% for code in minor %}
+                <a href="{{ url_for('show_rate', chosen_code=code) }}" class="button button-secondary">
+                    {{ code }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
 </body>
 </html>
